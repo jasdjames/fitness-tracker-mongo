@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // routes
-// app.use(require('./routes/api.js'));
+app.use(require('./routes/apiRoutes'));
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}!`);
