@@ -30,7 +30,7 @@ router.get('/exercise', (req, res) => {
 
 router.post('/api/workouts', ({ body }, res) => {
   console.log('We hit the route!!');
-  Workout.create({})
+  Workout.create({ body })
     .then((lastWorkout) => {
       res.json(lastWorkout);
     })
@@ -44,14 +44,25 @@ router.put('/api/workouts/:id', (req, res) => {
   Workout.findOneAndUpdate(
     { _id: req.params.id },
     { $push: { exercises: req.body } }
-  ).then((workout) => {
-    res.json(workout);
-  });
+  )
+    .then((workout) => {
+      res.json(workout);
+    })
+    .catch((err) => {
+      res.status(400).json(err);
+    });
 });
 
 router.get('/api/workouts/range', (req, res) => {
-  Workout.find({})
-    // .sort({ day: -1 })
+  Workout.aggregate([
+    {
+      $addFields: {
+        totalDuration: {
+          $sum: '$exercises.duration',
+        },
+      },
+    },
+  ])
     .limit(10)
     .then((lastWorkout) => {
       res.json(lastWorkout);
@@ -63,6 +74,9 @@ router.get('/api/workouts/range', (req, res) => {
 
 router.get('/stats', (req, res) => {
   res.sendFile(path.join(__dirname, '../public', 'stats.html'));
+});
+router.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
 module.exports = router;
